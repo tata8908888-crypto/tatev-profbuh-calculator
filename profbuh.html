@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Калькулятор бухгалтерских услуг — Tatev.Profbuh</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root{
+      --green:#1C4A35; --orange:#E8631A; --orange-soft:#FEF0E8; --bg:#F7F6F2;
+      --white:#FFFFFF; --text:#1A1A1A; --muted:#666666; --line:#e7e1d7; --yellow:#F5C842;
+      --shadow: 0 14px 40px rgba(28,74,53,.10);
+      --shadow-hover: 0 22px 60px rgba(28,74,53,.18);
+      --radius: 24px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top left, rgba(232,99,26,.13), transparent 32%), var(--bg);color:var(--text);}
+    .container{max-width:1180px;margin:0 auto;padding:28px 18px 150px}
+    header{position:relative;overflow:hidden;border-radius:32px;padding:34px 30px;background:linear-gradient(135deg,#1C4A35 0%,#286848 48%,#E8631A 135%);color:#fff;box-shadow:var(--shadow)}
+    header:after{content:"";position:absolute;inset:-80px -80px auto auto;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.13);filter:blur(2px)}
+    .brand{display:flex;gap:14px;align-items:center;position:relative;z-index:1}
+    .logo{display:flex;gap:6px;align-items:center;padding:10px 12px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:999px;backdrop-filter:blur(8px)}
+    .dot{width:16px;height:16px;border-radius:50%;display:block}.d1{background:var(--yellow)}.d2{background:var(--orange)}.d3{background:var(--green);border:1px solid rgba(255,255,255,.35)}
+    h1{position:relative;z-index:1;margin:20px 0 8px;font-size:clamp(34px,5vw,66px);line-height:.96;letter-spacing:-.05em;background:linear-gradient(90deg,#fff,#fff7ef 45%,rgba(255,255,255,.48));-webkit-background-clip:text;background-clip:text;color:transparent;max-width:820px}
+    .subtitle{position:relative;z-index:1;font-size:clamp(16px,2vw,22px);opacity:.94;max-width:760px;margin:0}
+    .grid{display:grid;grid-template-columns:1fr 370px;gap:22px;margin-top:24px;align-items:start}
+    main{display:grid;gap:18px}.card{background:var(--white);border:1px solid rgba(28,74,53,.08);border-radius:var(--radius);padding:22px;box-shadow:0 8px 28px rgba(30,33,29,.055);transition:.25s ease}.card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+    .section-title{display:flex;align-items:center;gap:10px;margin:0 0 16px;font-size:22px;color:var(--green)}.badge{min-width:34px;height:34px;border-radius:12px;background:var(--orange-soft);color:var(--orange);display:inline-grid;place-items:center;font-weight:800}
+    label{display:block;font-weight:700;margin:12px 0 7px}.hint{font-size:13px;color:var(--muted);margin-top:5px}
+    select,input[type="number"]{width:100%;min-height:44px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:11px 13px;font:inherit;color:var(--text);outline:none}select:focus,input:focus{border-color:var(--orange);box-shadow:0 0 0 4px rgba(232,99,26,.11)}
+    .switch{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.switch input{position:absolute;opacity:0}.switch label{margin:0;min-height:48px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:16px;cursor:pointer;background:#fff;transition:.2s}.switch input:checked+label{background:var(--green);color:#fff;border-color:var(--green);box-shadow:0 10px 22px rgba(28,74,53,.18)}
+    .two{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.check-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.check{min-height:52px;display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:16px;padding:12px;background:#fff;cursor:pointer}.check input{margin-top:3px;accent-color:var(--orange);min-width:18px;min-height:18px}.price{display:block;color:var(--orange);font-weight:800;margin-top:2px}.rowline{height:1px;background:var(--line);margin:16px 0}.hidden{display:none!important}
+    aside{position:sticky;top:18px}.summary{background:var(--green);color:#fff;border-radius:28px;padding:22px;box-shadow:0 18px 48px rgba(28,74,53,.25)}.summary h2{margin:0 0 12px;font-size:23px}.summary .panel{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:14px;margin:12px 0}.summary small{display:block;color:rgba(255,255,255,.72);margin-bottom:5px}.summary ul{margin:8px 0 0;padding-left:18px;color:rgba(255,255,255,.9);font-size:14px}.total{margin-top:14px;padding:18px;border-radius:20px;background:#fff;color:var(--green);font-size:32px;font-weight:900;letter-spacing:-.04em;text-align:center}.actions{display:grid;gap:10px;margin-top:14px}.btn{min-height:48px;border:0;border-radius:16px;padding:12px 16px;font:inherit;font-weight:800;cursor:pointer;transition:.2s}.btn-primary{background:var(--orange);color:#fff}.btn-secondary{background:#fff;color:var(--green)}.btn:hover{transform:translateY(-1px);filter:brightness(.98)}.status{min-height:22px;text-align:center;color:#fff;font-weight:800;margin-top:8px}.mini{font-size:12px;opacity:.75;text-align:center;margin-top:8px}.pill{display:inline-flex;align-items:center;gap:8px;background:var(--orange-soft);color:var(--orange);border-radius:999px;padding:7px 10px;font-size:13px;font-weight:800;margin-bottom:12px}
+    @media (max-width:960px){.grid{grid-template-columns:1fr}aside{position:static}.container{padding-bottom:24px}.summary{position:sticky;bottom:10px;z-index:5}.check-grid,.two,.three{grid-template-columns:1fr}}
+    @media (max-width:560px){header{padding:26px 20px;border-radius:24px}.card{padding:17px}.summary{border-radius:22px}.total{font-size:26px}.brand{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand"><div class="logo"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span></div><strong>Бухгалтерское агентство Татев Багрян / Tatev.Profbuh</strong></div>
+      <h1>Калькулятор бухгалтерских услуг</h1>
+      <p class="subtitle">Безупречная бухгалтерия: рассчитайте ежемесячную стоимость сопровождения и сформируйте коммерческое предложение.</p>
+    </header>
+
+    <div class="grid">
+      <main>
+        <section class="card"><h2 class="section-title"><span class="badge">1</span>Форма организации</h2>
+          <div class="switch"><input id="client-ip" type="radio" name="clientType" value="ip" checked><label for="client-ip">ИП</label><input id="client-ooo" type="radio" name="clientType" value="ooo"><label for="client-ooo">ООО</label></div>
+          <div id="employee-mode-wrap"><label>Для ИП</label><div class="switch"><input id="emp-no" type="radio" name="employeeMode" value="no" checked><label for="emp-no">Без сотрудников</label><input id="emp-yes" type="radio" name="employeeMode" value="yes"><label for="emp-yes">С сотрудниками</label></div></div>
+        </section>
+
+        <section class="card"><h2 class="section-title"><span class="badge">2</span>Система налогообложения</h2>
+          <label for="taxSystem">Выберите СНО</label><select id="taxSystem"></select>
+          <div id="vatWrap"><label for="vatType">НДС</label><select id="vatType"><option value="0">Без НДС</option><option value="10000">НДС 5/7% — +10 000 ₽</option><option value="15000">НДС 10/20% — +15 000 ₽</option></select><div class="hint">НДС скрывается для ПСН + нулёвка и нулевой отчётности.</div></div>
+        </section>
+
+        <section id="employeesCard" class="card hidden"><h2 class="section-title"><span class="badge">3</span>Сотрудники</h2><div class="two" id="employeeInputs"></div></section>
+
+        <section class="card"><h2 class="section-title"><span class="badge">4</span>Маркетплейсы</h2><div class="check-grid" id="marketplaces"></div></section>
+        <section class="card"><h2 class="section-title"><span class="badge">5</span>ККТ и эквайринг</h2><div class="check-grid" id="kkt"></div></section>
+
+        <section class="card"><h2 class="section-title"><span class="badge">6</span>Первичная документация</h2>
+          <span class="pill">Пакеты выбираются взаимоисключающе</span>
+          <label>Поступление товаров/услуг</label><div class="check-grid" id="incomingDocs"></div><div id="incomingCustomWrap" class="hidden"><label>Количество операций поступления &gt;100</label><input id="incomingCustomQty" type="number" min="0" value="101"></div>
+          <div class="rowline"></div><label>Реализация товаров/услуг</label><div class="check-grid" id="outgoingDocs"></div><div id="outgoingCustomWrap" class="hidden"><label>Количество операций реализации &gt;100</label><input id="outgoingCustomQty" type="number" min="0" value="101"></div>
+          <div class="rowline"></div><label>Прочая первичка</label><div class="two" id="otherDocs"></div>
+        </section>
+
+        <section class="card"><h2 class="section-title"><span class="badge">7</span>Дополнительные услуги</h2>
+          <label>Разное</label><div class="check-grid" id="misc"></div><div id="hirePackWrap" class="hidden"><label>Количество сотрудников для пакета «Приём сотрудника»</label><input id="hirePackQty" type="number" min="0" value="1"></div>
+          <div class="rowline"></div><label>ВЭД</label><div class="check-grid" id="ved"></div>
+          <div class="rowline"></div><label>Кредитные договоры в месяц</label><div class="check-grid" id="credits"></div>
+        </section>
+      </main>
+
+      <aside><section class="summary"><h2>Итог расчёта</h2>
+        <div class="panel"><small>Базовый тариф</small><strong id="baseText">—</strong></div>
+        <div class="panel"><small>Переменная часть</small><ul id="addonsList"><li>Пока ничего не выбрано</li></ul></div>
+        <div class="total" id="totalText">0 ₽</div>
+        <div class="actions"><button class="btn btn-primary" id="downloadPdf">Скачать КП (PDF)</button><button class="btn btn-secondary" id="copyText">Копировать текст КП</button></div>
+        <div class="status" id="status"></div><div class="mini">Предложение не является публичной офертой</div>
+      </section></aside>
+    </div>
+  </div>
+
+<script>
+const fmt = n => new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
+const cleanFile = s => s.replace(/[\\/:*?"<>|%]/g,'').replace(/\s+/g,'_');
+const tariffs = {
+  ip_no:{label:'ИП без сотрудников', items:{'УСН Доходы 6%':12000,'УСН Доходы–Расходы':18000,'ПСН + нулевка':14400,'ОСН':21600,'УСН Доходы + ПСН':18000,'УСН Доходы–Расходы + ПСН':22800,'ОСН + ПСН':26400}},
+  ip_yes:{label:'ИП с сотрудниками', items:{'УСН Доходы 6%':24000,'УСН Доходы–Расходы':36000,'ПСН + нулевка':28800,'ОСН':43200,'УСН Доходы + ПСН':36000,'УСН Доходы–Расходы + ПСН':45600,'ОСН + ПСН':52800}},
+  ooo:{label:'ООО с сотрудниками', items:{'УСН Доходы':36000,'УСН Доходы–Расходы':54000,'Нулёвка':5000,'ОСН':72000}}
+};
+const employees=[['empRf','Граждане РФ',1800],['empForeignNo','Иностранцы без патента',2000],['empForeignPatent','Иностранцы с патентом',2500],['empGph','ФЛ ГПХ / Самозанятые',2000]];
+const marketplaces=[['wbNoVat','Wildberries без НДС',10000],['wbVat','Wildberries с НДС',12000],['ozonNoVat','Озон без НДС',8000],['ozonVat','Озон с НДС',10000],['yamNoVat','ЯМ / СММ без НДС',8000],['yamVat','ЯМ / СММ с НДС',12000],['sberNoVat','СберМегамаркет без НДС',8000],['sberVat','СберМегамаркет с НДС',10000]];
+const kkt=[['kktOnline','ККТ (онлайн-касса)',4000],['tradeAcq','Торговый эквайринг',4000],['internetAcq','Интернет-эквайринг',2000],['yookassa','ЮКасса',6000]];
+const packs=[['none','Не выбрано',0],['mini','Пакет Мини (до 20 операций)',3200],['standard','Пакет Стандарт (21–50 операций)',7500],['max','Пакет Макс (51–100 операций)',13500],['custom','Поштучно >100 операций',0]];
+const otherDocs=[['payOrders','Платёжные поручения',250],['advanceReports','Авансовые отчёты',800],['reconciliations','Акты сверки',500],['edoDocs','Документы через ЭДО',200]];
+const misc=[['extraBank','Доп. расчётный счёт',2000],['patent','Патент',4000],['vks','ВКС',4000],['foreignNotice','Уведомление о приёме иностранца через госуслуги',5000],['hrDocs','Кадровые документы (положения, локальные акты) — разово',15000],['hirePack','Пакет «Приём сотрудника» (ТД + кадровые docs)',4000]];
+const ved=[['gtd','Внесение ГТД',2000],['vedPay','Платёжное поручение ВЭД',1000],['eaesReport','Отчётность при импорте ЕАЭС (1 договор)',10000]];
+const credits=[['bankLoan','Кредитный договор с банком',1200],['mpLoan','Кредитный договор с WB / Озон',4000],['factoring','Факторинг',6000],['crowd','Краундлендинг (The деньги, JetLend, Вдело)',3000],['contractStd','Договор с поставщиком/покупателем (стандартный)',2500]];
+function checkboxHtml([id,label,price], qty=false){return qty?`<div><label class="check" for="${id}"><input id="${id}" type="checkbox"><span>${label}<span class="price">${fmt(price)}/шт</span></span></label><input id="${id}Qty" type="number" min="0" value="0" aria-label="Количество: ${label}"></div>`:`<label class="check" for="${id}"><input id="${id}" type="checkbox"><span>${label}<span class="price">${fmt(price)}</span></span></label>`}
+function radioPackHtml(group, [id,label,price]){return `<label class="check" for="${group}_${id}"><input id="${group}_${id}" type="radio" name="${group}" value="${id}" ${id==='none'?'checked':''}><span>${label}<span class="price">${id==='custom'?'по тарифу':fmt(price)}</span></span></label>`}
+function init(){document.getElementById('employeeInputs').innerHTML=employees.map(e=>`<div><label>${e[1]} <span class="price">${fmt(e[2])}/чел.</span></label><input id="${e[0]}" type="number" min="0" value="0"></div>`).join('');
+ document.getElementById('marketplaces').innerHTML=marketplaces.map(e=>checkboxHtml(e)).join(''); document.getElementById('kkt').innerHTML=kkt.map(e=>checkboxHtml(e)).join('');
+ document.getElementById('incomingDocs').innerHTML=packs.map(e=>radioPackHtml('incoming',e)).join(''); document.getElementById('outgoingDocs').innerHTML=packs.map(e=>radioPackHtml('outgoing',e)).join('');
+ document.getElementById('otherDocs').innerHTML=otherDocs.map(e=>checkboxHtml(e,true)).join(''); document.getElementById('misc').innerHTML=misc.map(e=>checkboxHtml(e)).join(''); document.getElementById('ved').innerHTML=ved.map(e=>checkboxHtml(e)).join(''); document.getElementById('credits').innerHTML=credits.map(e=>checkboxHtml(e)).join('');
+ document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input', update)); document.querySelectorAll('input,select').forEach(el=>el.addEventListener('change', update)); document.getElementById('downloadPdf').addEventListener('click', downloadPDF); document.getElementById('copyText').addEventListener('click', copyOfferText); updateTaxOptions(); update();}
+function key(){const type=document.querySelector('input[name="clientType"]:checked').value; if(type==='ooo') return 'ooo'; return document.querySelector('input[name="employeeMode"]:checked').value==='yes'?'ip_yes':'ip_no'}
+function hasEmployees(){return key()!=='ip_no'}
+function updateTaxOptions(){const k=key(), sel=document.getElementById('taxSystem'), prev=sel.value; sel.innerHTML=Object.keys(tariffs[k].items).map(t=>`<option value="${t}">${t} — ${fmt(tariffs[k].items[t])}</option>`).join(''); if(Object.hasOwn(tariffs[k].items,prev)) sel.value=prev;}
+function lineFromChecked(list){const out=[]; list.forEach(([id,label,price])=>{const el=document.getElementById(id); if(el && el.checked) out.push({label,price});}); return out;}
+function qtyLines(list){const out=[]; list.forEach(([id,label,price])=>{const checked=document.getElementById(id)?.checked; const qty=+document.getElementById(id+'Qty')?.value||0; if(checked&&qty>0) out.push({label:`${label} × ${qty}`,price:price*qty});}); return out;}
+function packLine(group, qtyId, rate){const selected=document.querySelector(`input[name="${group}"]:checked`)?.value||'none'; if(selected==='none') return null; const pack=packs.find(p=>p[0]===selected); if(selected==='custom'){const qty=+document.getElementById(qtyId).value||0; return qty>0?{label:`${group==='incoming'?'Поступление':'Реализация'}: поштучно × ${qty}`,price:qty*rate}:null;} return {label:`${group==='incoming'?'Поступление':'Реализация'}: ${pack[1]}`,price:pack[2]};}
+function calc(){const k=key(), tax=document.getElementById('taxSystem').value, baseTariff=tariffs[k].items[tax]||0; const vat=+document.getElementById('vatType').value||0; const vatLabel=vat?document.getElementById('vatType').selectedOptions[0].text.split(' — ')[0]:''; let addons=[];
+ if(hasEmployees()) employees.forEach(([id,label,price])=>{const qty=+document.getElementById(id).value||0; if(qty>0) addons.push({label:`${label} × ${qty}`,price:qty*price});});
+ addons=addons.concat(lineFromChecked(marketplaces),lineFromChecked(kkt)); const inc=packLine('incoming','incomingCustomQty',400), out=packLine('outgoing','outgoingCustomQty',600); if(inc) addons.push(inc); if(out) addons.push(out); addons=addons.concat(qtyLines(otherDocs), lineFromChecked(misc).filter(x=>!x.label.startsWith('Пакет «Приём')));
+ if(document.getElementById('hirePack')?.checked){const q=+document.getElementById('hirePackQty').value||0; if(q>0) addons.push({label:`Пакет «Приём сотрудника» × ${q}`,price:q*4000});}
+ addons=addons.concat(lineFromChecked(ved), lineFromChecked(credits)); const base=baseTariff+vat; const total=base+addons.reduce((s,a)=>s+a.price,0); return {k,tax,baseTariff,vat,vatLabel,base,addons,total,client:tariffs[k].label};}
+function update(){updateTaxOptions(); document.getElementById('employee-mode-wrap').classList.toggle('hidden', document.querySelector('input[name="clientType"]:checked').value==='ooo'); document.getElementById('employeesCard').classList.toggle('hidden', !hasEmployees()); const tax=document.getElementById('taxSystem').value; const noVat=(tax==='ПСН + нулевка'||tax==='Нулёвка'); document.getElementById('vatWrap').classList.toggle('hidden', noVat); if(noVat) document.getElementById('vatType').value='0'; document.getElementById('incomingCustomWrap').classList.toggle('hidden', document.querySelector('input[name="incoming"]:checked')?.value!=='custom'); document.getElementById('outgoingCustomWrap').classList.toggle('hidden', document.querySelector('input[name="outgoing"]:checked')?.value!=='custom'); document.getElementById('hirePackWrap').classList.toggle('hidden', !document.getElementById('hirePack')?.checked); const c=calc(); document.getElementById('baseText').textContent=`${c.tax}${c.vatLabel?' + '+c.vatLabel:''} — ${fmt(c.base)}`; document.getElementById('addonsList').innerHTML=c.addons.length?c.addons.map(a=>`<li>${a.label} — ${fmt(a.price)}</li>`).join(''):'<li>Пока ничего не выбрано</li>'; document.getElementById('totalText').textContent=fmt(c.total);}
+function offerText(){const c=calc(); return `КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ\nИП Багрян Татев Генриковна | Безупречная бухгалтерия\nПредложение не является публичной офертой\n\nДЛЯ: ${c.client} · ${c.tax}${c.vatLabel?' · '+c.vatLabel:''}\nВключает: бухгалтерский и налоговый учёт, отчётность, контроль налогов, консультации 1 ч/мес\n\nРАСЧЁТ:\nБазовый тариф: ${c.tax}${c.vatLabel?' + '+c.vatLabel:''} — ${fmt(c.base)}\n${c.addons.length?'\nПеременная часть:\n'+c.addons.map(a=>`- ${a.label} — ${fmt(a.price)}`).join('\n'):''}\n\nИТОГО В МЕСЯЦ: ${fmt(c.total)}\n\nСтоимость НЕ включает: ответы на требования; складской учёт; управленческий учёт; восстановление учёта; ведение первичной документации вне выбранных пакетов. Полный перечень предоставляется по запросу.\n\nИП Багрян Татев Генриковна\nИНН: 772089059129 · ОГРНИП: 321774600565971\n+7 916 924 00 99\ntb-profbuh.ru · tata.buh1@yandex.ru · @Tatev.Profbuh`;}
+async function copyOfferText(){await navigator.clipboard.writeText(offerText()); flash('Текст скопирован!');}
+function flash(t){const s=document.getElementById('status'); s.textContent=t; setTimeout(()=>s.textContent='',2400)}
+function downloadPDF(){const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'}); const c=calc(); const W=210; let y=0; const green=[28,74,53], orange=[232,99,26], light=[247,246,242], soft=[254,240,232]; const text=(str,x,yy,opt={})=>doc.text(String(str),x,yy,opt); const rub=n=>fmt(n).replace('₽','руб.');
+ doc.setFillColor(...green); doc.rect(0,0,W,39,'F'); doc.setTextColor(255); doc.setFont('helvetica','bold'); doc.setFontSize(18); text('КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ',14,15); doc.setFontSize(10); doc.setFont('helvetica','normal'); text('ИП Багрян Татев Генриковна | Безупречная бухгалтерия',14,24); text('Предложение не является публичной офертой',14,31); doc.setFillColor(...orange); doc.rect(14,35,182,1.8,'F');
+ y=48; doc.setFillColor(...light); doc.roundedRect(14,y,182,24,4,4,'F'); doc.setTextColor(...green); doc.setFont('helvetica','bold'); doc.setFontSize(11); text('ДЛЯ',20,y+8); doc.setTextColor(30); doc.setFont('helvetica','normal'); text(`${c.client} · ${c.tax}${c.vatLabel?' · '+c.vatLabel:''}`,20,y+15); doc.setFontSize(8.5); text('Включает: бухгалтерский и налоговый учёт, отчётность, контроль налогов, консультации 1 ч/мес',20,y+21,{maxWidth:165});
+ y=82; function row(cols, fills, color=[30,30,30], bold=false, h=9){doc.setFillColor(...fills); doc.rect(14,y,182,h,'F'); doc.setTextColor(...color); doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(bold?10:9); text(cols[0],18,y+6,{maxWidth:130}); text(cols[1],180,y+6,{align:'right'}); y+=h;}
+ row(['Наименование','Сумма'],green,[255,255,255],true,10); row([`Базовый тариф: ${c.tax}${c.vatLabel?' + '+c.vatLabel:''}`,rub(c.base)],[255,255,255],[30,30,30],true,10); row(['Переменная часть (нерегулярные процедуры)',''],orange,[255,255,255],true,9); if(c.addons.length){c.addons.forEach((a,i)=>{if(y>250){doc.addPage(); y=18;} row([a.label,rub(a.price)],i%2?[255,255,255]:[247,246,242]);});} else row(['Не выбрано','0 руб.'],[247,246,242]); row(['ИТОГО В МЕСЯЦ',rub(c.total)],green,[255,255,255],true,12);
+ y+=8; doc.setTextColor(...orange); doc.setFont('helvetica','bold'); doc.setFontSize(11); text('Стоимость НЕ включает:',14,y); y+=7; doc.setTextColor(40); doc.setFont('helvetica','normal'); doc.setFontSize(9); ['ответы на требования','складской учёт','управленческий учёт','восстановление учёта','ведение первичной документации (вне выбранных пакетов)','Полный перечень предоставляется по запросу'].forEach(s=>{text('• '+s,18,y); y+=5;});
+ y+=4; doc.setTextColor(...green); doc.setFont('helvetica','bold'); doc.setFontSize(11); text('Регламент взаимодействия',14,y); y+=6; const regs=[['Данные','Источник','Способ','Число'],['Выписки (1С+PDF)','От клиента бухгалтеру','Директ-банк/ЛК банка','1–5'],['ОФД/отчёты МП','От клиента бухгалтеру','ЛК ОФД/ЛК МП','1–5'],['ПП на налоги','От бухгалтера клиенту','Директ-банк/ЛК банка','10–28'],['Уведомления и отчёты','От бухгалтера клиенту','1С','20–25']]; const widths=[45,52,62,23]; regs.forEach((r,i)=>{let x=14; doc.setFillColor(i?255:28,i?255:74,i?255:53); doc.rect(14,y,182,9,'F'); r.forEach((cell,j)=>{doc.setTextColor(i?35:255); doc.setFont('helvetica',i?'normal':'bold'); doc.setFontSize(7.5); text(cell,x+2,y+6,{maxWidth:widths[j]-4}); x+=widths[j];}); y+=9;});
+ y+=7; doc.setFillColor(...soft); doc.roundedRect(14,y,182,31,4,4,'F'); doc.setTextColor(...green); doc.setFont('helvetica','bold'); doc.setFontSize(11); text('Протокол начала работы',20,y+8); const steps=['Подписание договора (акцепт оферты)','Оплата гарантийного взноса (последний месяц)','Регистрация базы','Передача документов','Начало работы']; let sx=20; steps.forEach((s,i)=>{doc.setFillColor(...orange); doc.circle(sx,y+18,3,'F'); doc.setTextColor(255); doc.setFontSize(7); text(i+1,sx,y+20,{align:'center'}); doc.setTextColor(40); doc.setFontSize(7); text(s,sx+5,y+16,{maxWidth:30}); sx+=35;});
+ doc.setFillColor(...green); doc.rect(0,280,W,17,'F'); doc.setTextColor(255); doc.setFont('helvetica','bold'); doc.setFontSize(8.5); text('ИП Багрян Татев Генриковна',14,286); doc.setFont('helvetica','normal'); text('ИНН: 772089059129 · ОГРНИП: 321774600565971',14,291); doc.setTextColor(...orange); doc.setFont('helvetica','bold'); text('+7 916 924 00 99',112,286); doc.setTextColor(255); doc.setFont('helvetica','normal'); text('tb-profbuh.ru · tata.buh1@yandex.ru · @Tatev.Profbuh',112,291);
+ doc.save(`KP_TatevProfbuh_${cleanFile(c.tax)}.pdf`); flash('PDF скачан!');}
+init();
+</script>
+</body>
+</html>
